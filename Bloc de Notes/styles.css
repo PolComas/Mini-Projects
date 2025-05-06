@@ -1,0 +1,46 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    font-family: sans-serif;
+  }
+  
+  .menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 0.5rem 1rem;
+  }
+  
+  .menu-left, .menu-center, .menu-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu-center {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .menu button {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .menu button:hover {
+    text-decoration: underline;
+  }
+  
+  #editor {
+    width: 100%;
+    height: calc(100% - 50px);
+    padding: 1rem;
+    box-sizing: border-box;
+    font: 1rem/1.4 monospace;
+  }
+  

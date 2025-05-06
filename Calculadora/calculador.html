@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang='ca'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Calculadora Científica</title>
+<style>
+:root{
+    font-family: system-ui, sans-serif;
+    --bg:#f4f4f5;
+    --btn:#e2e8f0;
+    --btn-hover:#cbd5e1;
+    --accent:#3b82f6;
+}
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background:var(--bg);
+}
+.calculator{
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+    width:min(420px,90vw);
+    background:white;
+    border-radius:1rem;
+    padding:1rem;
+    box-shadow:0 6px 15px rgba(0,0,0,.1);
+}
+#display{
+    width:100%;
+    font-size:2rem;
+    padding:0.5rem;
+    border:none;
+    background:transparent;
+    text-align:right;
+    outline:none;
+}
+.buttons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0.5rem;
+}
+button{
+    padding:1rem;
+    font-size:1.2rem;
+    border:none;
+    border-radius:0.5rem;
+    background:var(--btn);
+    cursor:pointer;
+    transition:background .15s;
+}
+button:hover{
+    background:var(--btn-hover);
+}
+button.operator{
+    background:var(--accent);
+    color:white;
+}
+button.operator:hover{
+    background:#2563eb;
+}
+.scientific{
+    display:none;
+    margin-top:0.5rem;
+}
+.scientific.active{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0.5rem;
+}
+@media(max-width:480px){
+    button{
+        padding:0.8rem;
+        font-size:1rem;
+    }
+    #display{
+        font-size:1.5rem;
+    }
+}
+</style>
+</head>
+<body>
+<div class='calculator'>
+    <input id='display' type='text' placeholder='0' />
+    <div class='buttons'>
+        <button data-key='7'>7</button>
+        <button data-key='8'>8</button>
+        <button data-key='9'>9</button>
+        <button class='operator' data-key='/'>÷</button>
+
+        <button data-key='4'>4</button>
+        <button data-key='5'>5</button>
+        <button data-key='6'>6</button>
+        <button class='operator' data-key='*'>×</button>
+
+        <button data-key='1'>1</button>
+        <button data-key='2'>2</button>
+        <button data-key='3'>3</button>
+        <button class='operator' data-key='-'>−</button>
+
+        <button data-key='0'>0</button>
+        <button data-key='.'>.</button>
+        <button id='clear'>C</button>
+        <button class='operator' data-key='+'>+</button>
+
+        <button id='toggle-scientific' style='grid-column:span 2'>Mode científic</button>
+        <button id='backspace'>⌫</button>
+        <button id='equals' class='operator'>=</button>
+    </div>
+    <div class='scientific' id='scientific-panel'>
+        <button data-fn='sin('>sin</button>
+        <button data-fn='cos('>cos</button>
+        <button data-fn='tan('>tan</button>
+        <button data-fn='sqrt('>√</button>
+
+        <button data-fn='ln('>ln</button>
+        <button data-fn='log10('>log</button>
+        <button data-fn='factorial('>x!</button>
+        <button data-key='^'>^</button>
+    </div>
+</div>
+
+<script>
+(function(){
+const display=document.getElementById('display');
+const buttons=document.querySelectorAll('.buttons button[data-key]');
+const clearBtn=document.getElementById('clear');
+const equalsBtn=document.getElementById('equals');
+const backspaceBtn=document.getElementById('backspace');
+const sciToggle=document.getElementById('toggle-scientific');
+const sciPanel=document.getElementById('scientific-panel');
+const sciButtons=sciPanel.querySelectorAll('button');
+
+function appendToDisplay(val){
+    display.value+=val;
+}
+
+function factorial(n){
+    if(n<0) return NaN;
+    if(n===0||n===1) return 1;
+    let res=1;
+    for(let i=2;i<=n;i++) res*=i;
+    return res;
+}
+
+function evaluateExpression(expr){
+    let sanitized=expr
+        .replace(/÷/g,'/')
+        .replace(/×/g,'*')
+        .replace(/\^/g,'**')
+        .replace(/sin\(/g,'Math.sin(')
+        .replace(/cos\(/g,'Math.cos(')
+        .replace(/tan\(/g,'Math.tan(')
+        .replace(/sqrt\(/g,'Math.sqrt(')
+        .replace(/ln\(/g,'Math.log(')
+        .replace(/log10\(/g,'Math.log10(')
+        .replace(/factorial\(/g,'factorial(');
+
+    try{
+        const result=Function('factorial','return '+sanitized)(factorial);
+        return isFinite(result) ? result : 'Error';
+    }catch(e){
+        return 'Error';
+    }
+}
+
+buttons.forEach(btn=>{
+    btn.addEventListener('click',()=> appendToDisplay(btn.dataset.key));
+});
+sciButtons.forEach(btn=>{
+    if(btn.dataset.fn){
+        btn.addEventListener('click',()=> appendToDisplay(btn.dataset.fn));
+    }else if(btn.dataset.key){
+        btn.addEventListener('click',()=> appendToDisplay(btn.dataset.key));
+    }
+});
+
+clearBtn.addEventListener('click',()=> display.value='');
+backspaceBtn.addEventListener('click',()=> display.value=display.value.slice(0,-1));
+equalsBtn.addEventListener('click',()=> display.value=evaluateExpression(display.value));
+
+sciToggle.addEventListener('click',()=>{
+    sciPanel.classList.toggle('active');
+    sciToggle.classList.toggle('operator');
+});
+
+// Keyboard bindings
+document.addEventListener('keydown',e=>{
+    if((e.key>='0'&& e.key<='9') || '+-*/.^()'.includes(e.key)){
+        appendToDisplay(e.key);
+    }else if(e.key==='Enter'){
+        e.preventDefault();
+        display.value=evaluateExpression(display.value);
+    }else if(e.key==='Backspace'){
+        backspaceBtn.click();
+    }else if(e.key==='Escape'){
+        clearBtn.click();
+    }
+});
+})();
+</script>
+</body>
+</html>

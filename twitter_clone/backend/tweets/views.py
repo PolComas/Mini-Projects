@@ -3,7 +3,7 @@ from rest_framework import viewsets, generics, status
 from .models import Tweet, UserProfile
 from .serializers import TweetSerializer, UserRegisterSerializer, UserProfileSerializer
 from django.contrib.auth.models import User
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 # Create your views here.
@@ -18,6 +18,7 @@ class TweetViewSet(viewsets.ModelViewSet):
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
 class UserTweetsList(generics.ListAPIView):
     serializer_class = TweetSerializer
